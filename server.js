@@ -35,9 +35,9 @@ app.post("/ssl-request", async (req, res) => {
 		total_amount: Number(price),
 		currency: "BDT",
 		tran_id,
-		success_url: `${process.env.CLIENT_ROOT || "http://localhost:3001"}/success`,
-		fail_url: `${process.env.CLIENT_ROOT || "http://localhost:3001"}/fail`,
-		cancel_url: `${process.env.CLIENT_ROOT || "http://localhost:3001"}/cancel`,
+		success_url: `${process.env.SERVER_ROOT}/payment/success?tran_id=${tran_id}`,
+		fail_url: `${process.env.SERVER_ROOT}/payment/fail?tran_id=${tran_id}`,
+		cancel_url: `${process.env.SERVER_ROOT}/payment/cancel?tran_id=${tran_id}`,
 		shipping_method: "No",
 		product_name: name,
 		product_category: product_category,
@@ -57,7 +57,7 @@ app.post("/ssl-request", async (req, res) => {
 		value_b: "ref002_B",
 		value_c: "ref003_C",
 		value_d: "ref004_D",
-		ipn_url: `${process.env.CLIENT_ROOT || "http://localhost:3001"}/notification`,
+		ipn_url: `${process.env.SERVER_ROOT}/payment/notification`,
 	};
 
 	const sslcommerz = new SSLCommerzPayment(
@@ -69,7 +69,7 @@ app.post("/ssl-request", async (req, res) => {
 		//https://developer.sslcommerz.com/doc/v4/#returned-parameters
 
 		if (data?.GatewayPageURL) {
-			return res.redirect(data.GatewayPageURL);
+			return res.status(200).json({ url: data.GatewayPageURL });
 		}
 
 		return res.status(400).json({
