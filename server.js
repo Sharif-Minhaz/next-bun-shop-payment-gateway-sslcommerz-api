@@ -29,15 +29,16 @@ app.post("/ssl-request", async (req, res) => {
 		customer_country = "Bangladesh",
 		product_category = "Food",
 		tran_id,
+		auth_token,
 	} = req.body;
 
 	const data = {
 		total_amount: Number(price),
 		currency: "BDT",
 		tran_id,
-		success_url: `${process.env.SERVER_ROOT}/payment/success?tran_id=${tran_id}`,
-		fail_url: `${process.env.SERVER_ROOT}/payment/fail?tran_id=${tran_id}`,
-		cancel_url: `${process.env.SERVER_ROOT}/payment/cancel?tran_id=${tran_id}`,
+		success_url: `${process.env.SERVER_ROOT}/payment/success?tran_id=${tran_id}?token=${auth_token}`,
+		fail_url: `${process.env.SERVER_ROOT}/payment/fail?tran_id=${tran_id}?token=${auth_token}`,
+		cancel_url: `${process.env.SERVER_ROOT}/payment/cancel?tran_id=${tran_id}?token=${auth_token}`,
 		shipping_method: "No",
 		product_name: name,
 		product_category: product_category,
@@ -79,12 +80,12 @@ app.post("/ssl-request", async (req, res) => {
 });
 
 app.use((req, res, next) => {
-	res.status(404).json("Page not found");
+	res.status(404).json({ message: "Page not found" });
 });
 
 app.use((err, req, res, next) => {
 	console.error(err);
-	res.status(500).json("Internal server error");
+	res.status(500).json({ message: "Internal server error" });
 });
 
 app.listen(PORT, () => {
