@@ -60,23 +60,28 @@ app.post("/ssl-request", async (req, res) => {
 		value_d: "ref004_D",
 		ipn_url: `${process.env.SERVER_ROOT}/payment/notification`,
 	};
+	console.log("Inside ssl-request route service 🚀");
+	try {
+		const sslcommerz = new SSLCommerzPayment(
+			process.env.STORE_ID,
+			process.env.STORE_PASSWORD,
+			false //true for live default false for sandbox
+		);
+		sslcommerz.init(data).then((data) => {
+			//https://developer.sslcommerz.com/doc/v4/#returned-parameters
 
-	const sslcommerz = new SSLCommerzPayment(
-		process.env.STORE_ID,
-		process.env.STORE_PASSWORD,
-		false //true for live default false for sandbox
-	);
-	sslcommerz.init(data).then((data) => {
-		//https://developer.sslcommerz.com/doc/v4/#returned-parameters
+			if (data?.GatewayPageURL) {
+				return res.status(200).json({ url: data.GatewayPageURL });
+			}
 
-		if (data?.GatewayPageURL) {
-			return res.status(200).json({ url: data.GatewayPageURL });
-		}
-
-		return res.status(400).json({
-			message: "Session was not successful",
+			return res.status(400).json({
+				message: "Session was not successful",
+			});
 		});
-	});
+	} catch (error) {
+		console.error(error);
+		return res.status(500).json({ message: "Internal server error on sslcommerz init 💥" });
+	}
 });
 
 app.use((req, res, next) => {
@@ -85,7 +90,7 @@ app.use((req, res, next) => {
 
 app.use((err, req, res, next) => {
 	console.error(err);
-	res.status(500).json({ message: "Internal server error" });
+	res.status(500).json({ message: "Internal server error on sslcommerz 💥" });
 });
 
 app.listen(PORT, () => {
